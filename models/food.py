@@ -8,10 +8,10 @@ class Food(db.Model):
     type = db.Column(db.String(50))
     sr = db.Column(db.String(50)) #release version
     ndbno = db.Column(db.Integer) #nbd food number
-    name = db.Column(db.String(80), required=True)
+    name = db.Column(db.String(80), unique=True)
     sd = db.Column(db.String(120)) #short description
     fg = db.Column(db.String(120)) #food group
-    ds = db.Column(db.String(60), required=True) #database source
+    ds = db.Column(db.String(60)) #database source
     group = db.Column(db.String(60)) #food group
     food_list_id = db.Column(db.Integer, db.ForeignKey("food_list.id"))
     food_list = db.relationship("Food_List_Model")

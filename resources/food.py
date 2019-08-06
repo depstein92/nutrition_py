@@ -10,11 +10,11 @@ class Food_Resource(Resource):
     )
 
     parser.add_argument(
-      'name', type=string, required=True, help='name cannot be empty'
+      'name', type=str, required=True, help='name cannot be empty'
     )
 
     parser.add_argument(
-      'ds', type=string, required=True, help="database source cannot be empty"
+      'ds', type=str, required=True, help="database source cannot be empty"
     )
 
     @classmethod
