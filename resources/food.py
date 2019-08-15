@@ -6,11 +6,7 @@ class Food_Resource(Resource):
     parser = reqparse.RequestParser()
 
     parser.add_argument(
-      'id', type=int, required=True, help='id cannot be empty'
-    )
-
-    parser.add_argument(
-      'name', type=str, required=True, help='name cannot be empty'
+      'name', type=str, required=True, help='name cannot be empty in Food_Resource'
     )
 
     parser.add_argument(

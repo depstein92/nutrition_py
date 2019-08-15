@@ -6,14 +6,18 @@ class Food_List_Model(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(80))
 
-    food = db.relationship("Food_List_Model", lazy="dynamic")
+    food = db.relationship("Food", lazy="dynamic")
 
-    def __init__(self):
+    def __init__(self, name):
         self.name = name
 
     @classmethod
     def find_all(cls):
         return cls.query.all()
+
+    @classmethod
+    def find_food_list_by_name(cls, name):
+        return cls.query.filter_by(name=name).first()
 
     def save_to_db(self):
         db.session.add(self)

@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager
 from models.food import Food
 from models.food_list import Food_List_Model
 from resources.food import Food_Resource
+from resources.food_list import Food_List_Resource
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
@@ -19,6 +20,7 @@ def create_tables():
     db.create_all()
 
 api.add_resource(Food_Resource, '/food/<string:name>')
+api.add_resource(Food_List_Resource, '/food_list/<string:name>')
 
 if __name__ == "__main__":
     from db import db
