@@ -15,8 +15,7 @@ class Food(db.Model):
     food_list_id = db.Column(db.Integer, db.ForeignKey("food_list.id"))
     food_list = db.relationship("Food_List_Model")
 
-    def __init__(self, id, type, sr, ndbno, name, sd, fg, ds, group, food_list_id):
-        self.id = id
+    def __init__(self, type, sr, ndbno, name, sd, fg, ds, food_list_id):
         self.type = type
         self.sr = sr
         self.ndbno = ndbno
@@ -40,7 +39,7 @@ class Food(db.Model):
             "sd": self.sd,
             "fg": self.fg,
             "ds": self.ds,
-            "group": self.group
+            "food_list_id": self.food_list_id
         }
 
     def save_to_db(self):
