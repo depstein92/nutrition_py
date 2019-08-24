@@ -1,7 +1,7 @@
 from db import db
 
 
-class User(db.Model):
+class UserModel(db.Model):
     __tablename__ = 'user'
 
     id = db.Column(db.Integer, primary_key=true)
@@ -24,7 +24,7 @@ class User(db.Model):
     def save_to_db(cls):
         db.session.add(cls)
         db.session.add(cls)
- 
+
     def delete_from_db(self):
         db.session.delete(self)
         de.session.commit()

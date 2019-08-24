@@ -1,12 +1,14 @@
 from flask import Flask
 from db import db
 from flask_restful import Api
-from flask_jwt_extended import JWTManager
+from blacklist import BLACKLIST
 
 from models.food import Food
 from models.food_list import Food_List_Model
+
 from resources.food import Food_Resource
 from resources.food_list import Food_List_Resource
+from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 
 from sqlalchemy import event
 
@@ -24,6 +26,7 @@ def create_tables():
 ###########Routes###########
 api.add_resource(Food_Resource, '/food')
 api.add_resource(Food_List_Resource, '/food_list/<string:name>')
+
 
 ###########Create Sample Data###########
 @event.listens_for(Food.__table__, 'after_create')

@@ -10,7 +10,7 @@ class Food_Resource(Resource):
     def post(cls):
 
         ##################REFACTOR##############
-        
+
         data = {
           'type' : request.args.get('type'),
           'sr' : request.args.get('sr'),
