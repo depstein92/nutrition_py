@@ -47,5 +47,5 @@ class Food(db.Model):
         db.session.commit()
 
     def delete_from_db(self):
-        db.sesssoin.delete(self)
+        db.session.delete(self)
         de.session.commit()

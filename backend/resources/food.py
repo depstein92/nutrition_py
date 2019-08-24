@@ -9,6 +9,8 @@ class Food_Resource(Resource):
     @classmethod
     def post(cls):
 
+        ##################REFACTOR##############
+        
         data = {
           'type' : request.args.get('type'),
           'sr' : request.args.get('sr'),
@@ -29,11 +31,10 @@ class Food_Resource(Resource):
           'sd' : {'required': True, 'type' : 'string' },
           'fg' : {'required': True, 'type' : 'string' },
           'ds' : {'required': True, 'type' : 'string' },
-          'food_list_id' : { 'required' : True, 'type' : 'integer'}
+          'food_list_id' : { 'required' : True, 'type' : 'integer' }
         }
 
         v = Validator(schema)
-
         if not v(data):
             return 'Something wrong with your Validators: {}'.format(v.errors), 400
 
@@ -42,5 +43,3 @@ class Food_Resource(Resource):
             return 'Food has been saved'
         except Exception as e:
             return 'Food could not be saved, {}'.format(e)
-
-        return food
