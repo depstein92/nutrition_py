@@ -36,7 +36,7 @@ class Food_Resource(Resource):
 
         v = Validator(schema)
         if not v(data):
-            return 'Something wrong with your Validators: {}'.format(v.errors), 400
+            return {'message': 'Something wrong with your Validators: {}'.format(v.errors)}, 400
 
         try:
             food = Food(**data).save_to_db()
