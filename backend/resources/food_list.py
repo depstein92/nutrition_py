@@ -14,7 +14,8 @@ class Food_List_Resource(Resource):
         print('I am being hit')
         #import pdb; pdb.set_trace()
         if name == 'all':
-            all_food = Food_List_Model.find_all()            
+            all_food = Food_List_Model.find_all()
+
             if all_food:
                 formated_list = [food.to_json() for food in all_food]
                 return {'all_foods' : '{}'.format(formated_list)}
