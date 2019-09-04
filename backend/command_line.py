@@ -11,6 +11,7 @@ from pyfiglet import figlet_format, Figlet
 from PyInquirer import prompt, style_from_dict, Token, prompt
 from sqlalchemy import create_engine, inspect
 
+import pandas as pdf
 import sys
 import os
 import logging
@@ -24,9 +25,7 @@ metadata = db.MetaData()
 f = Figlet(font='slant')
 
 
-while exit != 'exit': #infinite loop
-    print(f.renderText('Nutrition Command Line'))
-
+while 1: #infinite loop
     questions = [
         {
          'type' : 'list',
@@ -35,14 +34,11 @@ while exit != 'exit': #infinite loop
          'choices' : [
            'Users',
            'Food',
-           'Food_List'
+           'Food_List',
+           'Exit'
          ]
         }
     ]
-
-    answer = prompt(questions)
-
-    print(answer['resource_selected'])
 
     main_menu_or_exit_prompt = [
       {
@@ -56,29 +52,86 @@ while exit != 'exit': #infinite loop
       }
     ]
 
+    print(f.renderText('Nutrition Command Line'))
+
+    answer = prompt(questions)
+
+    if answer['resource_selected'] == 'Exit':
+        print(f.renderText('Thanks for all the Fish...'))
+        break
+
+    def convert_to_dict(columns, rows):
+        arr = []
+        i = 0
+        for row in rows:
+          map = {}
+          for r in row:
+            if i == len(row) - 1:
+              i = 0
+              arr.append(map)
+            map['{}'.format(columns[i])] = row[i]
+            i += 1
+        return arr
+
+    def create_rows_and_columns(resource, *args):
+        if resource == 'User':
+            columns = ['username', 'password', 'id']
+            return convert_to_dict(columns, *args)
+        elif resource == 'Food':
+            columns = [
+            'type', 'sr', 'ndbno', 'name',
+            'sd', 'fg', 'ds', 'food_list_id'
+            ]
+            # rows_and_columns = create_rows_and_columns(data, answer['resource_selected'])
+            return convert_to_dict(columns, *args)
+        elif resource == 'Food_List':
+            columns = ['id', 'name', 'food']
+            return convert_to_dict(columns, *args)
+        else:
+            raise AttributeError(f'{resource} is not a known resource')
+
     if answer['resource_selected'] == 'Users':
         print(f.renderText('Users'))
         user = db.Table('user', metadata, autoload=True, autoload_with=engine)
         query = db.select([user])
         ResultProxy = connection.execute(query)
-        ResultSet = ResultProxy.fetchall()
+        data = ResultProxy.fetchall()
+        if len(data) is 0:
+           print('There are no {} sir.'.format(answer['resource_selected']))
+        else:
+           columns = ['type', 'sr', 'ndbno', 'name','sd', 'fg', 'ds', 'food_list_id']
+           rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+           for i in range(len(rows_and_columns)):
+               df = pdf.DataFrame(rows_and_columns[i], index=[i])
+               print(df[columns])
     elif answer['resource_selected'] == 'Food':
         print(f.renderText('Food'))
         food = db.Table('food', metadata, autoload=True, autoload_with=engine)
         query = db.select([food])
         ResultProxy = connection.execute(query)
-        ResultSet = ResultProxy.fetchall()
-        print(ResultSet[:3])
+        data = ResultProxy.fetchall()
+        if len(data) is 0:
+           print('There are no {} sir.'.format(answer['resource_selected']))
+        else:
+           columns = ['type', 'sr', 'ndbno', 'name', 'sd', 'fg', 'ds', 'food_list_id']
+           rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+           for i in range(len(rows_and_columns)):
+               df = pdf.DataFrame(rows_and_columns[i], index=[i])
+               print(df[columns])
     elif answer['resource_selected'] == 'Food_List':
         print('Food List Selected')
         print(f.renderText('Food List'))
         food_list = db.Table('food_list', metadata, autoload=True, autoload_with=engine)
         query = db.select([food_list])
         ResultProxy = connection.execute(query)
-        ResultSet = ResultProxy.fetchall()
-        print(ResultSet[:3])
-    else:
-        print('Not a viable selection')
+        data = ResultProxy.fetchall()
+        if len(data) is 0:
+            print('There are no {} sir.'.format(answer['resource_selected']))
+        else:
+            rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+            for i in range(len(rows_and_columns)):
+                df = pdf.DataFrame(rows_and_columns[i], index=[i])
+                print(df[columns])
 
     exit_or_continue = prompt(main_menu_or_exit_prompt)
 
