@@ -9,7 +9,7 @@ from resources.food import Food_Resource
 from resources.food_list import Food_List_Resource
 from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
 
-from sqlalchemy import event
+from sqlalchemy import event, DDL
 from db import db
 
 
@@ -106,8 +106,6 @@ def revoked_token_callback():
 ###########Routes###########
 api.add_resource(Food_Resource, '/food')
 api.add_resource(Food_List_Resource, '/food_list/<string:name>')
-
-
 api.add_resource(UserLogin, "/login")
 api.add_resource(UserRegister, "/register")
 api.add_resource(TokenRefresh, "/refresh")

@@ -29,6 +29,10 @@ class Food(db.Model):
     def find_food_by_name(cls):
         return cls.query.filter_by(name=name).first()
 
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
     def json(self):
         return {
             "id": self.id,

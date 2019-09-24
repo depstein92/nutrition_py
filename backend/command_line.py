@@ -1,15 +1,13 @@
 
-# See this link for references: https://codeburst.io/building-beautiful-command-line-interfaces-with-python-26c7e1bb54df
-# 1) import needed models
-# 2) determine and plan structure
-# 3) use conditional structure to return formatted response
-# 4) format response
-
 from __future__ import print_function
 from db import db
 from pyfiglet import figlet_format, Figlet
 from PyInquirer import prompt, style_from_dict, Token, prompt
-from sqlalchemy import create_engine, inspect
+from sqlalchemy import *
+
+from models.food import Food
+from models.food_list import Food_List_Model
+from models.user import UserModel
 
 import pandas as pdf
 import sys
@@ -20,9 +18,16 @@ sys.path.insert(0, os.path.abspath('..'))
 
 engine = create_engine("sqlite:///data.db")
 connection = engine.connect()
-metadata = db.MetaData()
+metadata = MetaData()
 
 f = Figlet(font='slant')
+
+
+def reset_table(model_name, table_name):
+    if not engine.dialect.has_table(engine, table_name):
+       model_name.__table__.create(engine)
+    else:
+       model_name.__table__.drop(engine)
 
 
 while 1: #infinite loop
@@ -35,7 +40,8 @@ while 1: #infinite loop
            'Users',
            'Food',
            'Food_List',
-           'Exit'
+           'Exit',
+           'Reset Database'
          ]
         }
     ]
@@ -50,6 +56,19 @@ while 1: #infinite loop
          'continue'
        ]
       }
+    ]
+
+    table_to_drop_menu = [
+       {
+        'type' : 'list',
+        'name' : 'table',
+        'message' : 'Pick a table to reset.',
+        'choices' : [
+          'Foods',
+          'Users',
+          'Food Lists'
+        ]
+       }
     ]
 
     print(f.renderText('Nutrition Command Line'))
@@ -92,48 +111,87 @@ while 1: #infinite loop
 
     if answer['resource_selected'] == 'Users':
         print(f.renderText('Users'))
-        user = db.Table('user', metadata, autoload=True, autoload_with=engine)
-        query = db.select([user])
-        ResultProxy = connection.execute(query)
-        data = ResultProxy.fetchall()
-        if len(data) is 0:
-           print('There are no {} sir.'.format(answer['resource_selected']))
+        if not engine.dialect.has_table(engine, 'user'):
+            print(' There is no table {}, '.format(answer['resource_selected']))
         else:
-           columns = ['type', 'sr', 'ndbno', 'name','sd', 'fg', 'ds', 'food_list_id']
-           rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
-           for i in range(len(rows_and_columns)):
-               df = pdf.DataFrame(rows_and_columns[i], index=[i])
-               print(df[columns])
+            user = db.Table('user', metadata, autoload=True, autoload_with=engine)
+            query = db.select([user])
+            ResultProxy = connection.execute(query)
+            data = ResultProxy.fetchall()
+            if len(data) is 0:
+               print('There are no {} sir.'.format(answer['resource_selected']))
+            else:
+               columns = ['type', 'sr', 'ndbno', 'name','sd', 'fg', 'ds', 'food_list_id']
+               rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+               for i in range(len(rows_and_columns)):
+                   df = pdf.DataFrame(rows_and_columns[i], index=[i])
+                   print(df[columns])
     elif answer['resource_selected'] == 'Food':
         print(f.renderText('Food'))
-        food = db.Table('food', metadata, autoload=True, autoload_with=engine)
-        query = db.select([food])
-        ResultProxy = connection.execute(query)
-        data = ResultProxy.fetchall()
-        if len(data) is 0:
-           print('There are no {} sir.'.format(answer['resource_selected']))
+        if not engine.dialect.has_table(engine, 'food'):
+            print(' There is no table {}, '.format(answer['resource_selected']))
         else:
-           columns = ['type', 'sr', 'ndbno', 'name', 'sd', 'fg', 'ds', 'food_list_id']
-           rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
-           for i in range(len(rows_and_columns)):
-               df = pdf.DataFrame(rows_and_columns[i], index=[i])
-               print(df[columns])
+            food = db.Table('food', metadata, autoload=True, autoload_with=engine)
+            query = db.select([food])
+            ResultProxy = connection.execute(query)
+            data = ResultProxy.fetchall()
+            if len(data) is 0:
+               print('There are no {} sir.'.format(answer['resource_selected']))
+            else:
+               columns = ['type', 'sr', 'ndbno', 'name', 'sd', 'fg', 'ds', 'food_list_id']
+               rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+               for i in range(len(rows_and_columns)):
+                   df = pdf.DataFrame(rows_and_columns[i], index=[i])
+                   print(df[columns])
     elif answer['resource_selected'] == 'Food_List':
         print('Food List Selected')
-        print(f.renderText('Food List'))
-        food_list = db.Table('food_list', metadata, autoload=True, autoload_with=engine)
-        query = db.select([food_list])
-        ResultProxy = connection.execute(query)
-        data = ResultProxy.fetchall()
-        if len(data) is 0:
-            print('There are no {} sir.'.format(answer['resource_selected']))
+        if not engine.dialect.has_table(engine, 'food_list'):
+            print(' There is no table {}, '.format(answer['resource_selected']))
         else:
-            rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
-            for i in range(len(rows_and_columns)):
-                df = pdf.DataFrame(rows_and_columns[i], index=[i])
-                print(df[columns])
+            print(f.renderText('Food List'))
+            food_list = db.Table('food_list', metadata, autoload=True, autoload_with=engine)
+            query = db.select([food_list])
+            ResultProxy = connection.execute(query)
+            data = ResultProxy.fetchall()
+            if len(data) is 0:
+                print('There are no {} sir.'.format(answer['resource_selected']))
+            else:
+                columns = ['id', 'name']
+                rows_and_columns = create_rows_and_columns(answer['resource_selected'], data)
+                for i in range(len(rows_and_columns)):
+                    df = pdf.DataFrame(rows_and_columns[i], index=[i])
+                    print(df[columns])
+    elif answer['resource_selected'] == 'Reset Database':
+
+        table_to_drop_answer = prompt(table_to_drop_menu)
+
+        if table_to_drop_answer['table'] == 'Foods':
+            if not engine.dialect.has_table(engine, 'food'):
+               Food.__table__.create(bind=engine)
+               print('Food table has been created')
+            else:
+               Food.__table__.drop(bind=engine)
+               print('Food table has been dropped')
+        elif table_to_drop_answer['table'] == 'Food Lists':
+            if not engine.dialect.has_table(engine, 'food_list'):
+               Food_List_Model.__table__.create(bind=engine)
+               print('Food List table has been created')
+            else:
+               Food_List_Model.__table__.drop(bind=engine)
+               print('Food List table has been dropped')
+        elif table_to_drop_answer['table'] == 'Users':
+            if engine.dialect.has_table(engine, 'user'):
+               UserModel.__table__.drop(bind=engine)
+               print('User table has been dropped')
+            else:
+               UserModel.__table__.create(bind=engine)
+               print('User table has been created')
+
+
 
     exit_or_continue = prompt(main_menu_or_exit_prompt)
+
+
 
     if exit_or_continue['exit'] == 'exit':
         print(f.renderText('Thanks for all the Fish...'))
