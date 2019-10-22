@@ -11,7 +11,6 @@ class Food_List_Resource(Resource):
         }
 
     def get(self, name):
-        print('I am being hit')
         #import pdb; pdb.set_trace()
         if name == 'all':
             all_food = Food_List_Model.find_all()

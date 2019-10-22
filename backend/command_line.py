@@ -5,14 +5,18 @@ from pyfiglet import figlet_format, Figlet
 from PyInquirer import prompt, style_from_dict, Token, prompt
 from sqlalchemy import *
 
+
 from models.food import Food
 from models.food_list import Food_List_Model
 from models.user import UserModel
+
 
 import pandas as pdf
 import sys
 import os
 import logging
+import requests
+import asyncio
 
 sys.path.insert(0, os.path.abspath('..'))
 
@@ -22,12 +26,27 @@ metadata = MetaData()
 
 f = Figlet(font='slant')
 
+#
+# celery_app = Celery('test_celery',
+#              broker='amqp://dan:dan@localhost/dan_vhost',
+#              backend='rpc://',
+#              include=['test_celery.tasks'])
 
 def reset_table(model_name, table_name):
     if not engine.dialect.has_table(engine, table_name):
        model_name.__table__.create(engine)
     else:
        model_name.__table__.drop(engine)
+
+
+# @celery_app.task
+# def fetch_sample_data():
+#     fda_data = response.get('https://api.nal.usda.gov/ndb/V2/reports?ndbno=01009&ndbno=01009&ndbno=45202763&ndbno=35193&type=b&format=json&api_key=DEMO_KEY')
+#     # user_data = response.get('')
+#     food_list = ['obj', 'obj', 'obj']
+#     print(' this is FDA DATA: {}'.format(fda_data))
+#     # print(' this is USER DATA: {}'.format(user_data))
+
 
 
 while 1: #infinite loop
@@ -40,8 +59,9 @@ while 1: #infinite loop
            'Users',
            'Food',
            'Food_List',
+           'Reset Database',
+           'Seed Database',
            'Exit',
-           'Reset Database'
          ]
         }
     ]
@@ -186,6 +206,7 @@ while 1: #infinite loop
             else:
                UserModel.__table__.create(bind=engine)
                print('User table has been created')
+    #elif answer['resource_selected'] == 'Reset Database':
 
 
 

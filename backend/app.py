@@ -1,17 +1,21 @@
 from flask import Flask, jsonify
-from flask_restful import Api
+from flask_restful import Api, Resource
 from flask_jwt_extended import JWTManager, jwt_refresh_token_required
+from celery import Celery
 from blacklist import BLACKLIST
 
 from models.food import Food
 from models.food_list import Food_List_Model
+
 from resources.food import Food_Resource
 from resources.food_list import Food_List_Resource
 from resources.user import UserRegister, UserLogin, TokenRefresh, UserLogout
+from resources.sample_data import Sample_Data
 
 from sqlalchemy import event, DDL
 from db import db
 
+import requests
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///data.db"
@@ -23,12 +27,14 @@ app.config["JWT_BLACKLIST_TOKEN_CHECKS"] = [
     "access",
     "refresh",
 ]  # allow blacklisting for access and refresh tokens
-app.secret_key = "yeet"
-api = Api(app)
+app.config.update(
+    CELERY_BROKER_URL='amqp://dan:dan@localhost:5672/dan_host',
+    CELERY_RESULT_BACKEND='db+sqlite:///data.db'
+)
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
+app.secret_key = "yeet"
+
+api = Api(app)
 
 ###########Login, Logout, Register###########
 
@@ -110,48 +116,8 @@ api.add_resource(UserLogin, "/login")
 api.add_resource(UserRegister, "/register")
 api.add_resource(TokenRefresh, "/refresh")
 api.add_resource(UserLogout, "/logout")
+api.add_resource(Sample_Data, "/sample_data")
 
-###########Create Sample Data###########
-@event.listens_for(Food.__table__, 'after_create')
-def insert_food_sample_data(*args, **kwargs):
-    db.session.add(Food(
-      food_list_id=1,
-      type="starch",
-      sr="6.7.89",
-      ndbno=4567,
-      name="Sweet Potato",
-      sd="A root vegetable high in Potassium",
-      fg="Spud",
-      ds="USDA"
-    ))
-    db.session.add(Food(
-      food_list_id=1,
-      type="starch",
-      sr="6.7.89",
-      ndbno=4567,
-      name="Morel Mushroom",
-      sd="A root vegetable high in Oxygen",
-      fg="fungus",
-      ds="USDA"
-    ))
-    db.session.add(Food(
-      food_list_id=1,
-      type="starch",
-      sr="6.7.89",
-      ndbno=4567,
-      name="Oyster Mushroom",
-      sd="A root vegetable high in Oxygen",
-      fg="fungus",
-      ds="USDA"
-    ))
-    db.session.commit()
-
-@event.listens_for(Food_List_Model.__table__, 'after_create')
-def create_food_list_sample_data(*args, **kwargs):
-    db.session.add(Food_List_Model(
-       id=1,
-       name="my Food List"
-    ))
 
 ##########Server########
 if __name__ == "__main__":
